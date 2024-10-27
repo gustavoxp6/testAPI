@@ -1,0 +1,12 @@
+create database CRUD;
+create table usuarios(
+id int auto_increment not null,
+nome varchar(50) not null,
+email varchar(50) not null,
+fone varchar(20) not null,
+data_nascimeto char(10) not null
+);
+create user 'grupoX'@'%' identified by 'grupoX';
+grant all privileges on * to 'grupoX'@'%';
+GRANT ALL PRIVILEGES ON crud.* TO 'grupoX'@'localhost' IDENTIFIED BY 'grupoX';
+FLUSH PRIVILEGES;

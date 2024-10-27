@@ -45,33 +45,38 @@ class ModelAccess {
 
     postAccess(nome = null, email = null, fone = null, data_nascimento = null) {
         // Função que registra o acesso no banco de dados.
-        
-        // Lê o arquivo de configuração 'env.json' na codificação UTF-8, convertendo seu conteúdo JSON em um objeto.
-
-        this._nome = (typeof nome !== 'string' || nome === null) ?
-            this.destroy(nome) : nome;
-        // Verifica se o 'nome' é uma string válida, caso contrário, lança erro.
-
-        this._email = (typeof email !== 'string' || email === null) ?
-            this.destroy(email) : email;
-        // Verifica se o 'email' é uma string válida, caso contrário, lança erro.
-        this._fone = (typeof fone !== 'string' || fone === null) ?
-            this.destroy(fone) : fone;
-        // Verifica se o 'fone' é uma string válida, caso contrário, lança erro.
-        this._data_nascimento = (typeof data_nascimento !== 'string' || data_nascimento === null) ?
-            this.destroy(data_nascimento) : data_nascimento;
-        // Verifica se o 'data_nascimento' é uma date válida, caso contrário, lança erro.
+        return new Promise((resolve, reject) => {
+       
         var table = 'usuarios';
         // Define o nome da tabela onde os dados serão inseridos. (Nota: o nome correto provavelmente seria 'access').
-
-        var sqlInsert = `insert into ${this._HandleDBMSMySQL._database}.${table} values (null, ${this._nome}, ${this._email}, ${this._fone}, ${this._data_nascimento})`;
+        var sqlInsert = `INSERT INTO ${this._HandleDBMSMySQL._database}.${table} 
+                       VALUES (null, ${mysql.escape(nome)}, ${mysql.escape(email)}, 
+                       ${mysql.escape(fone)}, ${mysql.escape(data_nascimento)})`;
         // Monta a consulta SQL para inserir os dados na tabela 'usuarios' no banco de dados definido no arquivo de configuração 'env.json'.
-        console.log(sqlInsert)
-        this._HandleDBMSMySQL.query(sqlInsert);
+        console.log('Executando a consulta SQL:', sqlInsert, [nome, email, fone, data_nascimento]); // Log antes da consulta
+        this._HandleDBMSMySQL.query(sqlInsert, [nome, email, fone, data_nascimento], (err, results) => {
+            if (err) {
+                console.error('Erro na consulta ao banco de dados:', err); // Log para consulta
+                return reject(err); // Aqui, o erro deve ser passado para o catch
+            }
+            console.log('Resultados da consulta:', results); // Log para resultados
+            resolve(results);
+        });
         // Executa a consulta SQL usando o gerenciador de banco de dados MySQL.
-
-        this._HandleDBMSMySQL.close();
-        // Fecha a conexão com o banco de dados.
+        
+        })
+    }
+    deleteAccess(id) {
+            return new Promise((resolve, reject) => {
+                const sql = `DELETE FROM usuarios WHERE id = ${id}`;
+                this._HandleDBMSMySQL.query(sql, [id], (err, results) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve(results);
+                });
+            });
+        
     }
 }
 

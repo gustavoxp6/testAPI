@@ -41,24 +41,20 @@ class HandleDBMSMySQL {
 
     query(sql, args) {
         return new Promise((resolve, reject) => {
-            // Retorna uma promessa que vai executar a consulta SQL e resolver ou rejeitar a promessa com base no resultado.
-
             this.connection.query(sql, args, (err, results, fields) => {
                 if (err) {
                     reject(err);
-                    // Se ocorrer um erro na consulta, a promessa será rejeitada com o erro.
                 } else {
-                    var resultsJSON = { 'data': {} };
-                    // Cria um objeto para armazenar os metadados e os dados da consulta.
-
-                    //resultsJSON.metadata = fields.map((r) => Object.assign({}, r));
-                    // Mapeia os metadados da consulta (os campos da tabela) e os copia para o objeto 'metadata'.
-
-                    resultsJSON.data = results.map((r) => Object.assign({}, r));
-                    // Mapeia os dados reais retornados pela consulta e os copia para o objeto 'data'.
-
-                    resolve(resultsJSON);
-                    // Resolve a promessa com os resultados da consulta.
+                    if (Array.isArray(results)) {
+                        // Caso de uma consulta SELECT que retorna várias linhas
+                        var resultsJSON = { 'metadata': {}, 'data': {} };
+                        //resultsJSON.metadata = fields.map((r) => Object.assign({}, r));
+                        resultsJSON.data = results.map((r) => Object.assign({}, r));
+                        resolve(resultsJSON);
+                    } else {
+                        // Caso de uma consulta INSERT/UPDATE/DELETE que não retorna linhas
+                        resolve({ message: "Operação realizada com sucesso!", results });
+                    }
                 }
             });
         });
